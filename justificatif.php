@@ -43,18 +43,16 @@
 						else 
 							$abs=2;
 					}
-					else
-						$abs=0;
 				}
 				if ($abs==2)
-					echo "Ce n'est plus possible de justifier l'absence du $date.";
+					echo "<br/>Ce n'est plus possible de justifier l'absence du $date.";
 				
-				if ($abs!=0 && $abs!=2){
+				
 					echo "<input type='file' name='file' id='file' /><br>";
 					echo "<input type='submit' name='submit' value='Envoyer'/>";
-				}
+				
 				if ($abs==0)
-					echo "Vous n'avez aucune absence à justifier.";
+					echo "<br/>Vous n'avez aucune absence à justifier.";
 				
 				?>
     	</form>
