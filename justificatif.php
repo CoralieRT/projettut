@@ -2,13 +2,9 @@
 
 <html>
     <?php
-        session_start();
         include('bdd_connect.php');
-		ob_start();
-		
-        
+		session_start();
 		$login=$_SESSION['login'];
-		
     ?>
     <head>
         <meta charset="utf-8" />
@@ -37,21 +33,23 @@
 					$difjour=$jouract-$jourabs;
 					$difheure=date('H')+1;
 					$date=$jourabs."-".$moisabs."-".$anneeabs;
-					if (($dateact==$ma && $difjour<2) || ($testdate=$ma && ($difjour==2 && $difheure<=$heure))){
-						
-						$date2="Absence du ".$date." à ".$heure;
-						echo "<select name='absence'>";
-						echo "<option value='$date $heure'>$date2</option>";
-					
+					if ($res['j']==0){
+						if (($dateact==$ma && $difjour<2) || ($testdate=$ma && ($difjour==2 && $difheure<=$heure))){
+							$date2="Absence du ".$date." à ".$heure;
+							$date3=$date." ".$heure;
+							echo "<input type='checkbox' name='absence[]' value='$date3'/><label>$date2</label><br/>";
+							
+						}
+						else 
+							$abs=2;
 					}
-					else 
-						$abs=2;
-						
+					else
+						$abs=0;
 				}
 				if ($abs==2)
-					echo "<option disabled>Ce n'est plus possible de justifier l'absence du $date.</option>";
-					echo "</select>";
-				if ($abs!=0){
+					echo "Ce n'est plus possible de justifier l'absence du $date.";
+				
+				if ($abs!=0 && $abs!=2){
 					echo "<input type='file' name='file' id='file' /><br>";
 					echo "<input type='submit' name='submit' value='Envoyer'/>";
 				}
@@ -80,7 +78,5 @@
         </script>
         <button class="btn-warning btn-outline" onclick="Deconnexion()">Deconnexion</button>
     </body>
-<?php 
-ob_end_flush();
-?>
+
 </html>
