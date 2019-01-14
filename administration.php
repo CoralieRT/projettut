@@ -114,7 +114,7 @@
 		<!-- récupération des justificatifs étudiants -->
 		<?php 
 		
-            $abs=$bdd->query('SELECT * FROM justificatif,etudiant WHERE etudiant.login=justificatif.loginetu');
+            $abs=$bdd->query('SELECT DISTINCT filename FROM justificatif,etudiant WHERE etudiant.login=justificatif.loginetu');
             echo "<h2>Récupérer les justificatifs des élèves</h2><br/>";
             //Ouvre le répertoire
             if(!is_dir('justificatifs')){
@@ -122,33 +122,27 @@
             }
             $rep= opendir("justificatifs");
             echo "<center><table id='justif'>\n";
-			$r=0;
-			while ($justif=$abs->fetch()){
-				$r+=1;
-				echo $r;
-				$id=$justif['id_justif'];
-                $nom=$justif['Nom'];
-				$prenom=$justif['Prénom'];
-				$fichier=$justif['filename'];
-				$date=$justif['dateabs'];
-				$heure=substr($date,10,18);
-				$date=substr($date,0,-9);
-				$dateact=$justif['date'];//echo "dateact:",$dateact;echo "<br>";
-				while ($justif2=$abs->fetch()){
-					$id2=$justif2['id_justif'];
-					$dateact2=$justif2['date'];
-					echo "dateact2:",$dateact2;
-					echo "<br>";
-					
-					if (($dateact==$dateact2) && ($id2!=$id)){
-						$rec=1;
-						echo $rec;
+			while($fichierex = readdir($rep)){
+                if ($fichierex!="." && $fichierex!=".."){
+					while ($justif=$abs->fetch()){
+						$fichier=$justif['filename'];echo "ze",$fichier;
+						if ($fichierex==$fichier){
+							echo "<tr>";
+							echo "<td id='test' ><a href='justificatifs/", $fichier ,"' target='_blank'>Télécharger le justificatif $fichier</a></td>";
+							$abs2=$bdd->prepare('SELECT * FROM justificatif,etudiant WHERE filename=? AND etudiant.login=justificatif.loginetu');
+							$abs2->execute(array($fichier));
+							while ($justif2=$abs2->fetch()){
+								$nom=$justif2['Nom'];
+								$prenom=$justif2['Prénom'];
+								$date=$justif2['dateabs'];
+								$heure=substr($date,10,18);
+								$date=substr($date,0,-9);
+								echo "<td><p>Absence de $prenom $nom le $date à $heure</p></td>";
+								$fichierex=0;
+							}
+							echo "</tr>";
+						}	
 					}
-					
-					echo "<tr>";
-						echo "<td><p>Absence de $prenom $nom le $date à $heure</p></td>";
-						echo "<td id='test' ><a href='justificatifs/", $fichier ,"' target='_blank'>Télécharger le justificatif $fichier</a></td>";
-					echo "</tr>\n";
 				}
 			}
             echo "</table></center>\n";
