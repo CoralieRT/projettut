@@ -1,5 +1,6 @@
 <?php
     session_start();
+	ob_start();
     include('bdd_connect.php');
 
     if (isset($_POST['nom']) && isset($_POST['prénom']) && isset($_POST['log']) && isset($_POST['mdp'])){
@@ -112,6 +113,7 @@
     	</fieldset>
 		<!-- récupération des justificatifs étudiants -->
 		<?php 
+		
             $abs=$bdd->query('SELECT * FROM justificatif,etudiant WHERE etudiant.login=justificatif.loginetu');
             echo "<h2>Récupérer les justificatifs des élèves</h2><br/>";
             //Ouvre le répertoire
@@ -119,26 +121,36 @@
                 mkdir('justificatifs');
             }
             $rep= opendir("justificatifs");
-            
             echo "<center><table id='justif'>\n";
-            while($fichier = readdir($rep)){
-                if ($fichier!="." && $fichier!=".."){
-                    
-                    while ($justif=$abs->fetch()){
-                        $nom=$justif['Nom'];
-                        $prenom=$justif['Prénom'];
-                        $fichier=$justif['filename'];
-                        $date=$justif['dateabs'];
-                        $heure=substr($date,10,18);
-                        $date=substr($date,0,-9);
-                        echo "<tr>";
-                            echo "<td>Absence de $prenom $nom le $date à $heure</td>";
-                            echo "<td><a href='justificatifs/" . $fichier ."' target='_blank'>Télécharger le justificatif</a></td>";
-                        echo "</tr>\n";
-                    }
-                    
-                }
-            } 
+			$r=0;
+			while ($justif=$abs->fetch()){
+				$r+=1;
+				echo $r;
+				$id=$justif['id_justif'];
+                $nom=$justif['Nom'];
+				$prenom=$justif['Prénom'];
+				$fichier=$justif['filename'];
+				$date=$justif['dateabs'];
+				$heure=substr($date,10,18);
+				$date=substr($date,0,-9);
+				$dateact=$justif['date'];//echo "dateact:",$dateact;echo "<br>";
+				while ($justif2=$abs->fetch()){
+					$id2=$justif2['id_justif'];
+					$dateact2=$justif2['date'];
+					echo "dateact2:",$dateact2;
+					echo "<br>";
+					
+					if (($dateact==$dateact2) && ($id2!=$id)){
+						$rec=1;
+						echo $rec;
+					}
+					
+					echo "<tr>";
+						echo "<td><p>Absence de $prenom $nom le $date à $heure</p></td>";
+						echo "<td id='test' ><a href='justificatifs/", $fichier ,"' target='_blank'>Télécharger le justificatif $fichier</a></td>";
+					echo "</tr>\n";
+				}
+			}
             echo "</table></center>\n";
             closedir($rep);
         ?>
@@ -164,5 +176,5 @@
 
         <a class="btn-warning btn-outline" href="modifs.php" role="button">Paramètres du compte</a>
     </body>
-
+<?php ob_end_flush(); ?>	
 </html>
