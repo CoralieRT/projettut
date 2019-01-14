@@ -137,7 +137,6 @@
 								$heure=substr($date,10,18);
 								$date=substr($date,0,-9);
 								echo "<td><p>Absence de $prenom $nom le $date à $heure</p></td>";
-							
 							}	echo "</tr>";
 							
 					}
