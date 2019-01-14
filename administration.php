@@ -125,8 +125,7 @@
 			while($fichierex = readdir($rep)){
                 if ($fichierex!="." && $fichierex!=".."){
 					while ($justif=$abs->fetch()){
-						$fichier=$justif['filename'];echo "ze",$fichier;
-						if ($fichierex==$fichier){
+						$fichier=$justif['filename'];
 							echo "<tr>";
 							echo "<td id='test' ><a href='justificatifs/", $fichier ,"' target='_blank'>Télécharger le justificatif $fichier</a></td>";
 							$abs2=$bdd->prepare('SELECT * FROM justificatif,etudiant WHERE filename=? AND etudiant.login=justificatif.loginetu');
@@ -138,10 +137,9 @@
 								$heure=substr($date,10,18);
 								$date=substr($date,0,-9);
 								echo "<td><p>Absence de $prenom $nom le $date à $heure</p></td>";
-								$fichierex=0;
-							}
-							echo "</tr>";
-						}	
+							
+							}	echo "</tr>";
+							
 					}
 				}
 			}
