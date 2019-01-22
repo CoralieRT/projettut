@@ -36,11 +36,17 @@
                         $demij=" le matin";
 					if (($res['heure']<="19:00:00") &&($res['heure']>="13:45:00"))  	//si nous sommes l'après-midi
                         $demij=" l'après-midi";
-                ?>
+					$date=$res['date'];
+					$date=substr($date,0,10);//echo $date;
+					$date1=substr($date,0,4);//echo $date1;
+					$date2=substr($date,5,2);//echo $date2;
+					$date3=substr($date,8,10);//echo $date3;
+					$date=$date3."-".$date2."-".$date1;//echo $date;
+					?>
                 <tr>
                     <td><?php echo $res['j']; ?></td>
                     <td><?php echo $res['nj']; ?></td>
-                    <td><?php echo $res['date'].$demij; ?></td>
+                    <td><?php echo $date.$demij; ?></td>
                 </tr>
                 <?php
                     $jtotal = $res['j']+$jtotal;
