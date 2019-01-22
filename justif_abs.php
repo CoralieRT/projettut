@@ -28,7 +28,7 @@
 		$date=substr($date,0,10);	
 		if (($heure<="12:15:00") &&($heure>="08:00:00"))
 			$date=$date." matinée";
-        if (($heure<="19:00:00") &&($heure>="13:45:00"))  
+       		if (($heure<="19:00:00") &&($heure>="13:45:00"))  
 			$date=$date." après-midi";
 		$heureact=date('H')+1;
 		$dateact=date('Y-m-d ').$heureact.date(':i');
