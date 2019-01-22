@@ -17,7 +17,7 @@
         <h1>Statistiques individuelles d'absence</h1>
         
 		<form method="post" action="justif_abs.php" enctype="multipart/form-data">		
-			<input id="btn" value="1" type="checkbox" onchange="cocherdécocher(this.checked)" /> Tout Sélectionner<br/><br/>
+			<input id="btn" value="1" type="checkbox" onchange="cocherdécocher(this.checked)" /> Tout Sélectionner/désélectionenr<br/><br/>
 			<?php $reponse = $bdd->prepare('SELECT * FROM absencesdemij WHERE loginetu=?');	//Sélection des absences correspondants à l'étudiant
 				$reponse->execute(array($login));
 				$abs=0;
@@ -55,17 +55,17 @@
     	</form>
 		<script>
 			function cocherdécocher(){
-				var btn =document.getElementById('btn');
+				var btn =document.getElementById('btn');	//on récupère le bouton cocher décocher
 				var action = btn.value;
 				var cases = document.getElementsByTagName('input');	// on recupere tous les INPUT
-				for (var i = 0; i < cases.length; i++) {
-					if (cases[i].type == 'checkbox'){
-						if (action==1){
-							cases[i].checked = true;
+				for (var i = 0; i < cases.length; i++) {	//on parcourt les différentes input
+					if (cases[i].type == 'checkbox'){		//si c'est une checkbox
+						if (action==1){						
+							cases[i].checked = true;		//on la coche si elle est décochée (elle est décochée de base)
 							btn.value=0;
 						}
 						else{
-							cases[i].checked = false;
+							cases[i].checked = false;		//on la décoche si elle est cochée
 							btn.value=1;
 						}
 					}	
