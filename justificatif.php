@@ -17,7 +17,7 @@
         <h1>Statistiques individuelles d'absence</h1>
         
 		<form method="post" action="justif_abs.php" enctype="multipart/form-data">		
-			<input id="btn" value="1" type="checkbox" onchange="cocherdécocher(this.checked)" /> Tout Sélectionner/désélectionenr<br/><br/>
+			<input id="btn" value="1" type="checkbox" onchange="cocherdécocher(this.checked)" /> Tout sélectionner/désélectionenr<br/><br/>
 			<?php $reponse = $bdd->prepare('SELECT * FROM absencesdemij WHERE loginetu=?');	//Sélection des absences correspondants à l'étudiant
 				$reponse->execute(array($login));
 				$abs=0;
