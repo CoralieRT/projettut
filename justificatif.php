@@ -39,7 +39,6 @@
 							$date2="Absence du ".$date." à ".$heure;
 							$date3=$date." ".$heure;
 							echo "<input type='checkbox' name='absence[]' value='$date3'/><label>$date2</label><br/>";
-							
 						}
 						else 	//Si les 2 jours sont passés
 							$abs=2;
@@ -48,13 +47,10 @@
 				if ($abs==2)
 					echo "<br/>Ce n'est plus possible de justifier l'absence du $date.";
 				
-				
-					echo "<input type='file' name='file' id='file' /><br>";
-					echo "<input type='submit' name='submit' value='Envoyer'/>";
-				
+				echo "<input type='file' name='file' id='file' /><br>";
+				echo "<input type='submit' name='submit' value='Envoyer'/>";
 				if ($abs==0)	//S'il n'y a aucune absence à justifier
 					echo "<br/>Vous n'avez aucune absence à justifier.";
-				
 				?>
     	</form>
 		<script>
@@ -63,19 +59,17 @@
 				var action = btn.value;
 				var cases = document.getElementsByTagName('input');	// on recupere tous les INPUT
 				for (var i = 0; i < cases.length; i++) {
-						if (cases[i].type == 'checkbox'){
-							if (action==1){
-								cases[i].checked = true;
-								btn.value=0;
-							}
-							else{
+					if (cases[i].type == 'checkbox'){
+						if (action==1){
+							cases[i].checked = true;
+							btn.value=0;
+						}
+						else{
 							cases[i].checked = false;
 							btn.value=1;
-							}
-					}
-					
+						}
+					}	
 				}
-				
 			}
 		</script>
         <a class="btn-warning  btn-outline" href="modifs.php" role="button">Paramètres du compte</a>
