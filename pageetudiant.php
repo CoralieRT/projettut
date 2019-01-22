@@ -23,7 +23,6 @@
                     <td>Absences justifiées </td>
                     <td>Absence injustifiées</td>
                     <td>Date</td>
-                    <td>Demi-journée d'absence</td>
                 </tr>
             </thead>
             <tbody>
@@ -34,24 +33,25 @@
                 $reponse->execute(array($_SESSION['login']));
                 while ($res =$reponse->fetch())    
                 {
-                if (($res['heure']<"12:15:00") &&($res['heure']>"08:00:00"))
-                        $demij="matinée";
-                elseif (($res['heure']<"19:00:00") &&($res['heure']>"13:45:00"))  
-                        $demij="après-midi";
+			if (($res['heure']<="12:15:00") &&($res['heure']>="08:00:00"))
+                        	$demij="matinée";
+			if (($res['heure']<="19:00:00") &&($res['heure']>="13:45:00"))  
+                        	$demij="après-midi";
                 ?>
                 <tr>
                     <td><?php echo $res['j']; ?></td>
                     <td><?php echo $res['nj']; ?></td>
                     <td><?php echo $res['date']; ?></td>
-                    <td><?php echo $demij?></td>
                 </tr>
                 <?php
                     $jtotal = $res['j']+$jtotal;
                     $njtotal=$res['nj']+$njtotal;
-                    
                 }
                 $reponse->closeCursor();                                                //Termine le traitement de la requête
                 ?>
+                <tr>
+                    <td><?php echo $jtotal; ?></td>
+                    <td><?php echo $njtotal; ?></td>
             </tbody>
         </table>
         <a class="btn-warning  btn-outline" href="modifs.php" role="button">Paramètres du compte</a>
