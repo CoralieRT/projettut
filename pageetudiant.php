@@ -33,14 +33,14 @@
                 $reponse->execute(array($_SESSION['login']));
                 while ($res =$reponse->fetch()){		//affichage des absences de l'élève
 					if (($res['heure']<="12:15:00") &&($res['heure']>="08:00:00"))		//si nous sommes le matin
-                        $demij="matin";
+                        $demij=" le matin";
 					if (($res['heure']<="19:00:00") &&($res['heure']>="13:45:00"))  	//si nous sommes l'après-midi
-                        $demij="après-midi";
+                        $demij=" l'après-midi";
                 ?>
                 <tr>
                     <td><?php echo $res['j']; ?></td>
                     <td><?php echo $res['nj']; ?></td>
-                    <td><?php echo $res['date']; ?></td>
+                    <td><?php echo $res['date'].$demij; ?></td>
                 </tr>
                 <?php
                     $jtotal = $res['j']+$jtotal;
