@@ -112,38 +112,41 @@
     	</form>
     	</fieldset>
 		<!-- récupération des justificatifs étudiants -->
-		<?php 
-		
-            $abs=$bdd->query('SELECT DISTINCT filename FROM justificatif,etudiant WHERE etudiant.login=justificatif.loginetu');
-            echo "<h2>Récupérer les justificatifs des élèves</h2><br/>";
-            //Ouvre le répertoire
-            if(!is_dir('justificatifs')){
-                mkdir('justificatifs');
-            }
-            $rep= opendir("justificatifs");
-            echo "<center><table id='justif'>\n";
-			while($fichierex = readdir($rep)){
-                if ($fichierex!="." && $fichierex!=".."){
-					while ($justif=$abs->fetch()){
-						$fichier=$justif['filename'];
-							echo "<tr>";
-							echo "<td id='test' ><a href='justificatifs/", $fichier ,"' target='_blank'>Télécharger le justificatif $fichier</a></td>";
-							$abs2=$bdd->prepare('SELECT * FROM justificatif,etudiant WHERE filename=? AND etudiant.login=justificatif.loginetu');
-							$abs2->execute(array($fichier));
-							while ($justif2=$abs2->fetch()){
-								$nom=$justif2['Nom'];
-								$prenom=$justif2['Prénom'];
-								$date=$justif2['dateabs'];
-								$heure=substr($date,10,18);
-								$date=substr($date,0,-9);
-								echo "<td><p>Absence de $prenom $nom le $date à $heure</p></td>";
-							}	
-							echo "</tr>";	
-					}
+	<?php 
+		$abs=$bdd->query('SELECT DISTINCT filename FROM justificatif,etudiant WHERE etudiant.login=justificatif.loginetu');
+		echo "<h2>Récupérer les justificatifs des élèves</h2><br/>";
+		//Ouvre le répertoire et le créé s'il n'existe pas
+		if(!is_dir('justificatifs')){
+			mkdir('justificatifs');
+		}
+		$rep= opendir("justificatifs");
+		echo "<center><table id='justif'>\n";		//tableau affichant les justificatifs d'élèves 
+		while($fichierex = readdir($rep)){			//fichiers existants dans le répertoire
+			if ($fichierex!="." && $fichierex!=".."){	
+				while ($justif=$abs->fetch()){
+					$fichier=$justif['filename'];
+					echo "<tr>";
+					echo "<td><form method='post' action='suppression.php'><button type='submit' name='bouton' value='",$justif['filename'],"'>test</button></form></td>"; //amène à suppression.php
+					echo "<td id='test' ><a href='justificatifs/", $fichier ,"' target='_blank'>Télécharger le justificatif $fichier</a></td>";
+					$abs2=$bdd->prepare('SELECT * FROM justificatif,etudiant WHERE filename=? AND etudiant.login=justificatif.loginetu');
+					$abs2->execute(array($fichier));
+					while ($justif2=$abs2->fetch()){
+						$nom=$justif2['Nom'];
+						$prenom=$justif2['Prénom'];
+						$date=$justif2['dateabs'];
+						$demij=substr($date,11,18);
+						$date=substr($date,0,10);
+						if ($demij=="matin")
+							echo "<td><p>Absence de $prenom $nom le $date le $demij</p></td>";
+						if ($demij=="après-midi")
+							echo "<td><p>Absence de $prenom $nom le $date l'$demij</p></td>";
+					}	
+					echo "</tr>";
 				}
 			}
-            echo "</table></center>\n";
-            closedir($rep);
+		}
+		echo "</table></center>\n";
+		closedir($rep);
         ?>
 		<br/><br/><br/><br/><br/>
 
