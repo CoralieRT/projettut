@@ -2,7 +2,6 @@
 session_start (); // on démarre la session
 $login=$_POST['login'];
 $mdp=$_POST['mdp'];
-
 include('bdd_connect.php');
 
 //Première étape : Authentification d'un enseignant
@@ -98,12 +97,14 @@ else
         if ($mdp == $verif_mdp->fetchColumn())
         {
              //on stocke les variables dans les variables de session
-            $_SESSION['login']=$_POST['login'];
-            $_SESSION['mdp']=$_POST['mdp'];
-            //$verif_mdp->closeCursor(); // Termine le traitement de la requête mdp
+            $_SESSION['login']= $login;
+            $_SESSION['mdp']=$mdp;
+            $_SESSION['lat']=$_REQUEST['lat'];
+            $_SESSION['lon']=$_REQUEST['lon'];
+            $_SESSION['alt']=$_REQUEST['alt'];
 
             if(isset($_SESSION['v']))
-            {                    
+            {                   
                 $temps=time();
                 $jour=date('d');
                 $req_promo = $bdd->prepare('SELECT id_promo,Groupe FROM etudiant WHERE login = ?');
@@ -199,8 +200,9 @@ else
                 {
                     if ($_SESSION['v']==$qr_code)
                     {
-                        $lat=$_POST['lat'];
-                        $lon=$_POST['lon'];
+                        $lat=$_SESSION['lat'];
+                        $lon=$_SESSION['lon'];
+                        $alt=$_SESSION['alt'];
                         //recherche dans la BDD les salles avec leurs coordonnees
                         $rep = $bdd->prepare('SELECT * FROM geoloc WHERE Salle=?');
                         $rep->execute(array($salle));
@@ -218,6 +220,7 @@ else
                                     if ((($lon1 <= $lon) && ($lon <= $lon3)) || (($lon4 <= $lon) && ($lon <= $lon3))){ //mise en place du périmètre pour la longitude               
                                         $req = $bdd->prepare('UPDATE bdd_promo.etudiant SET `presencetemp` = 1 WHERE login = ?');
                                         $req->execute(array($login));
+                                        
                                         echo "<script> alert('Votre présence a bien été enregistrée (sous réserve de validation de l'enseignant')</script>";
                                         header('Location:pageetudiant.php');
                                     }
@@ -233,7 +236,7 @@ else
     }   
     else{
         header('Location: index.php'); // Si il manque login ou mdp, on renvoie vers la page d'accueil
-        $verif_mdp->closeCursor(); // Termine le traitement de la requête mdp
+        //$verif_mdp->closeCursor(); // Termine le traitement de la requête mdp
         $_SESSION['essais']=$_SESSION['essais']+1;
     }  
 }
