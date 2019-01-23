@@ -22,7 +22,7 @@
 	$name = basename($fichier);
 	move_uploaded_file($_FILES['file']['tmp_name'], $uploadfile);
 	$loginetu=$_SESSION['login'];
-	foreach($_POST['absence'] as $valeur){		//implémentation des jsutificaits dans la bdd avec les différents paramètres
+	foreach($_POST['absence'] as $valeur){		//implémentation des justificatifs dans la bdd avec les différents paramètres
 		$date=$valeur;
 		$heure=substr($date,11,18);
 		$date=substr($date,0,10);	
@@ -32,8 +32,8 @@
 			$date=$date." après-midi";
 		$heureact=date('H')+1;
 		$dateact=date('Y-m-d ').$heureact.date(':i');
-		$req = $bdd->prepare("INSERT INTO `justificatif` (`loginetu`, `dateabs`, `filename`, `date`) VALUES (:logetu,:dt,:name,:dtact)"); 	
-		$req->execute(array('logetu'=>$loginetu,'dt'=>$date,'name'=>$name,'dtact'=>$dateact));
+		$req = $bdd->prepare("INSERT INTO `justificatif` (`loginetu`, `dateabs`, `heureabs`, `filename`, `date`) VALUES (:logetu,:dt,:hr,:name,:dtact)"); 	
+		$req->execute(array('logetu'=>$loginetu,'dt'=>$date,'hr'=>$heure,'name'=>$name,'dtact'=>$dateact));
 		header('Location: justificatif.php');
 	}
 ?>
