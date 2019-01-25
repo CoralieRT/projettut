@@ -21,7 +21,7 @@
             <thead>
                 <tr>
                     <td>Absences justifiées </td>
-                    <td>Absence injustifiées</td>
+                    <td>Absences injustifiées</td>
                     <td>Date</td>
                 </tr>
             </thead>
