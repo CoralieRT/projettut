@@ -1,6 +1,6 @@
 <?php
 include('bdd_connect.php');
-$envoi=$bdd->query('SELECT * FROM absencesdemij,etudiant WHERE absencesdemij.loginetu=etudiant.login');
+$envoi=$bdd->query('SELECT * FROM absencesdemij,etudiant WHERE absencesdemij.j="0" AND absencesdemij.nj="1" AND absencesdemij.loginetu=etudiant.login');
 while ($res=$envoi->fetch()){
 	//echo $res['mail'];
 	$mail=$res['mail'];
