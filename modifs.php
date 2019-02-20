@@ -25,6 +25,40 @@
             <input type="password" name="mdpmodif" placeholder="nouveau mot de passe"><br>
             <input type="submit" class="btn btn-success" value="envoyer" />
         </form>
+		<br/>
+		<?php 
+		$login=$_SESSION['login'];
+
+		$mail=$bdd->prepare('SELECT * FROM etudiant WHERE login=?');
+		$mail->execute(array($login));
+		while ($res=$mail->fetch()){
+			$email=$res['mail'];
+			if ($email!=NULL)
+			echo "Vous avez défini l'adresse mail $email pour recevoir vos notifications d'absence.";
+			echo "<form method='POST' action='mail.php'>";
+			echo "<br><legend>Ajout/changement de votre adresse mail :</legend>";
+				echo "<input type='hidden' name='etu' value=$login>";
+				echo "<input type='email' name='email' size='30'><br>";
+				echo "<input type='submit' class='btn btn-success' value='envoyer' />";
+			echo "</form>";
+		}
+
+		$mail=$bdd->prepare('SELECT * FROM personnel WHERE login=?');
+		$mail->execute(array($login));
+		while ($res=$mail->fetch()){
+			$email=$res['mail'];
+			if ($email!=NULL)
+			echo "Vous avez défini l'adresse mail $email pour recevoir vos notifications d'absence.";
+			echo "<form method='POST' action='mail.php'>";
+			echo "<br><legend>Ajout/changement de votre adresse mail :</legend>";
+				echo "<input type='hidden' name='prof' value=$login>";
+				echo "<input type='email' name='email' size='30'><br>";
+				echo "<input type='submit' class='btn btn-success' value='envoyer' />";
+			echo "</form>";
+		}
+		?>
+		
+		
         </fieldset> 
         <a class="btn-warning btn-outline" href="javascript:history.go(-1)" role="button">Retour</a>
 
