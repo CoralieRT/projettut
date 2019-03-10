@@ -1,5 +1,54 @@
 <?php
     session_start();
+    include('bdd_connect.php');
+
+    if(isset($_POST['mdpmodif'])){
+        $login=$_SESSION['login'];
+        $mdp=$_SESSION['mdp'];
+        $nvmdp = $_POST['mdpmodif'];
+
+        $reqetu = $bdd->prepare('UPDATE bdd_promo.etudiant SET `MDP`= ? WHERE login = ? AND MDP = ?');
+        $reqens = $bdd->prepare('UPDATE bdd_promo.personnel SET `MDP`= ? WHERE login = ? AND MDP = ?');
+
+        if($_POST['mdp1']=$mdp)
+        {
+            $verif_login = $bdd->prepare('SELECT COUNT(*) FROM bdd_promo.personnel WHERE login = ?'); //On vérifie que le login existe dans la table
+            $verif_login->execute(array($login));
+            // Si le login rentré correspond à un login d'enseignant
+            if($verif_login->fetchColumn() != 0)
+            {
+                $reqens->execute(array($nvmdp,$login,$mdp));
+            }
+
+            $verif_login = $bdd->prepare('SELECT COUNT(*) FROM bdd_promo.etudiant WHERE login = ?'); 
+            $verif_login->execute(array($login));
+            // Si le login existe dans la table étudiant
+            if($verif_login->fetchColumn() !=0) 
+            {    
+                $reqetu->execute(array($nvmdp,$login,$mdp));
+            }
+            ?>
+
+            <script type="text/javascript">
+                window.alert('Modification réussie');
+            </script>
+            <?php
+        }
+    }
+    //Pour les étudiants
+    if (isset($_POST['etu'])){
+        $login=$_POST['etu'];
+        $email=$_POST['email'];
+        $req = $bdd->prepare("UPDATE etudiant SET mail=? WHERE login=?");
+        $req->execute(array($email,$login));
+    }
+    //Pour les professeurs/admin
+    if (isset($_POST['prof'])){
+        $login=$_POST['prof'];
+        $email=$_POST['email'];
+        $req = $bdd->prepare("UPDATE personnel SET mail=? WHERE login=?");
+        $req->execute(array($email,$login));
+    }
 ?>
 
 <!DOCTYPE html>
@@ -19,46 +68,45 @@
 
 
         <fieldset>
-        <form method="POST" action="update.php">
+        <form method="POST" action="modifs.php">
             <legend>Modification du mot de passe</legend>
             <input type="password" name="mdp1" placeholder="ancien mot de passe"><br>
             <input type="password" name="mdpmodif" placeholder="nouveau mot de passe"><br>
             <input type="submit" class="btn btn-success" value="envoyer" />
         </form>
-		<br/>
-		<?php 
-		$login=$_SESSION['login'];
-
-		$mail=$bdd->prepare('SELECT * FROM etudiant WHERE login=?');
-		$mail->execute(array($login));
-		while ($res=$mail->fetch()){
-			$email=$res['mail'];
-			if ($email!=NULL)
-			echo "Vous avez défini l'adresse mail $email pour recevoir vos notifications d'absence.";
-			echo "<form method='POST' action='mail.php'>";
-			echo "<br><legend>Ajout/changement de votre adresse mail :</legend>";
-				echo "<input type='hidden' name='etu' value=$login>";
-				echo "<input type='email' name='email' size='30'><br>";
-				echo "<input type='submit' class='btn btn-success' value='envoyer' />";
-			echo "</form>";
-		}
-
-		$mail=$bdd->prepare('SELECT * FROM personnel WHERE login=?');
-		$mail->execute(array($login));
-		while ($res=$mail->fetch()){
-			$email=$res['mail'];
-			if ($email!=NULL)
-			echo "Vous avez défini l'adresse mail $email pour recevoir vos notifications d'absence.";
-			echo "<form method='POST' action='mail.php'>";
-			echo "<br><legend>Ajout/changement de votre adresse mail :</legend>";
-				echo "<input type='hidden' name='prof' value=$login>";
-				echo "<input type='email' name='email' size='30'><br>";
-				echo "<input type='submit' class='btn btn-success' value='envoyer' />";
-			echo "</form>";
-		}
-		?>
-		
-		
+        <br/>
+        <?php 
+        $login=$_SESSION['login'];
+        //Changement étudiant
+        $mail=$bdd->prepare('SELECT * FROM etudiant WHERE login=?');
+        $mail->execute(array($login));
+        while ($res=$mail->fetch()){
+            $email=$res['mail'];
+            if ($email!=NULL)
+            echo "Vous avez défini l'adresse mail $email pour recevoir vos notifications d'absence.";
+            ?>
+            <form method='POST' action='modifs.php'>
+            <br><legend>Ajout/changement de votre adresse mail :</legend>
+                <input type='hidden' name='etu' value=$login>
+                <input type='email' name='email' size='30'><br>
+                <input type='submit' class='btn btn-success' value='envoyer' />
+            </form><?php
+        }
+        //Changement enseignant
+        $mail=$bdd->prepare('SELECT * FROM personnel WHERE login=?');
+        $mail->execute(array($login));
+        while ($res=$mail->fetch()){
+            $email=$res['mail'];
+            if ($email!=NULL)
+            echo "Vous avez défini l'adresse mail $email pour recevoir vos notifications d'absence.";?>
+            <form method='POST' action='modifs.php'>
+            <br><legend>Ajout/changement de votre adresse mail :</legend>
+                <input type='hidden' name='prof' value=$login>
+                <input type='email' name='email' size='30'><br>
+                <input type='submit' class='btn btn-success' value='envoyer' />
+            </form><?php
+        }
+        ?>
         </fieldset> 
         <a class="btn-warning btn-outline" href="javascript:history.go(-1)" role="button">Retour</a>
 
