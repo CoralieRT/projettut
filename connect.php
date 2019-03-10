@@ -2,6 +2,7 @@
 session_start (); // on démarre la session
 $login=$_POST['login'];
 $mdp=$_POST['mdp'];
+$mdp = crypt($mdp,$login);
 include('bdd_connect.php');
 
 //Première étape : Authentification d'un enseignant
@@ -16,8 +17,8 @@ if($verif_login->fetchColumn() != 0)
     if ($mdp == $verif_mdp->fetchColumn())                                        // Si le mot de passe correspond (enseignant)
     {
         //on stocke les variables dans les variables de session
-        $_SESSION['login']=$_POST['login'];
-        $_SESSION['mdp']=$_POST['mdp'];
+        $_SESSION['login']=$login;
+        $_SESSION['mdp']=$mdp;
         $verif_mdp->closeCursor(); // Termine le traitement de la requête mdp
         //direction vers la page d'administration
         if ($_SESSION['login']=='admin'){ 
@@ -29,7 +30,7 @@ if($verif_login->fetchColumn() != 0)
             $mois=date('m');
             /*Recherche du prof dans la bdd*/
             $rec=$bdd->prepare('SELECT `id_prof` FROM `personnel` WHERE `login` = ?');
-            $rec->execute(array($_POST['login']));
+            $rec->execute(array($login));
             while($rep=$rec->fetch())
             {
                 $idpr=$rep['id_prof'];
@@ -202,7 +203,8 @@ else
                     {
                         $lat=$_SESSION['lat'];
                         $lon=$_SESSION['lon'];
-                        $alt=$_SESSION['alt'];
+                        //$alt=$_SESSION['alt'];
+                        $_SESSION['salle']=$salle;
                         //recherche dans la BDD les salles avec leurs coordonnees
                         $rep = $bdd->prepare('SELECT * FROM geoloc WHERE Salle=?');
                         $rep->execute(array($salle));
@@ -224,9 +226,9 @@ else
                                         echo "<script> alert('Votre présence a bien été enregistrée (sous réserve de validation de l'enseignant')</script>";
                                         header('Location:pageetudiant.php');
                                     }
-                                    else{ echo "<script> alert('Pas à la bonne position')</script>";}
+                                    else{ echo "<script> alert('Pas à la bonne position donc vous n'êtes pas noté présent')</script>";}
                                 }
-                                else{ echo "<script> alert('Pas à la bonne position')</script>";}
+                                else{ echo "<script> alert('Pas à la bonne position donc vous n'êtes pas noté présent')</script>";}
                         }
                     }
                 }
