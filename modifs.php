@@ -1,23 +1,23 @@
 <?php
     session_start();
     include('bdd_connect.php');
-
+    /*modification du mot de passe*/
     if(isset($_POST['mdpmodif'])){
         $login=$_SESSION['login'];
-        $mdp=$_SESSION['mdp'];
-        $nvmdp = $_POST['mdpmodif'];
+        $mdp=crypt($_SESSION['mdp'],$login);
+        $nvmdp = crypt($_POST['mdpmodif'],$login);
 
         $reqetu = $bdd->prepare('UPDATE bdd_promo.etudiant SET `MDP`= ? WHERE login = ? AND MDP = ?');
         $reqens = $bdd->prepare('UPDATE bdd_promo.personnel SET `MDP`= ? WHERE login = ? AND MDP = ?');
 
-        if($_POST['mdp1']=$mdp)
+        if(crypt($_POST['mdp1'],$login)==$mdp)
         {
             $verif_login = $bdd->prepare('SELECT COUNT(*) FROM bdd_promo.personnel WHERE login = ?'); //On vérifie que le login existe dans la table
             $verif_login->execute(array($login));
             // Si le login rentré correspond à un login d'enseignant
             if($verif_login->fetchColumn() != 0)
             {
-                $reqens->execute(array($nvmdp,$login,$mdp));
+                $reqens->execute(array($nvmdp,$login,$_SESSION['mdp']));
             }
 
             $verif_login = $bdd->prepare('SELECT COUNT(*) FROM bdd_promo.etudiant WHERE login = ?'); 
@@ -35,6 +35,7 @@
             <?php
         }
     }
+    /*ajout d'une adresse mail*/
     //Pour les étudiants
     if (isset($_POST['etu'])){
         $login=$_POST['etu'];
@@ -49,6 +50,8 @@
         $req = $bdd->prepare("UPDATE personnel SET mail=? WHERE login=?");
         $req->execute(array($email,$login));
     }
+    //header('location:modifs.php');
+
 ?>
 
 <!DOCTYPE html>
