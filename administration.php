@@ -1,18 +1,22 @@
 <?php
     session_start();
-	ob_start();
+    ob_start();
     include('bdd_connect.php');
-
+    /*Ajout d'un intervenant*/
     if (isset($_POST['nom']) && isset($_POST['prénom']) && isset($_POST['log']) && isset($_POST['mdp'])){
-    	$req = $bdd->prepare("INSERT INTO `personnel` (`Nom`, `Prénom`, `login`,`mdp`) VALUES (:nom,:prenom,:log,:mdp)");
-		$req->execute(array('nom'=>$_POST['nom'],'prenom'=>$_POST['prénom'],'log'=>$_POST['log'],'mdp'=>$_POST['mdp']));
+        $mdp=crypt($_POST['mdp'],$_POST['log']);
+        $f=fopen('enseignants.txt','a+');
+        fwrite($f,$_POST['log'].', '.$_POST['mdp']);
+        fclose($f);
+        $req = $bdd->prepare("INSERT INTO `personnel` (`Nom`, `Prénom`, `login`,`mdp`) VALUES (:nom,:prenom,:log,:mdp)");
+        $req->execute(array('nom'=>$_POST['nom'],'prenom'=>$_POST['prénom'],'log'=>$_POST['log'],'mdp'=>$mdp));
     }
+    /*recherche d'un cours enseignant*/
     if (isset($_POST['enseignant'])){
-        /*va savoir pourquoi mais on récupère pas le prénom du prof encore sinon c ok*/
-    	$k=explode(' ',$_POST['enseignant']);
-    	$temps=time();
+        /*ajouter la récupération du prénom*/
+        $k=explode(' ',$_POST['enseignant']);
+        $temps=time();
         $jour=date('d');
-
         if (!isset($k[0]) || !isset($k[1])){
             //$k[0]=0;
             $k[1]=0;
@@ -24,14 +28,11 @@
         {
             $idpr=$rep['id_prof'];
         }
-
         /*Recherche du cours dans la bdd*/
         $req_temps_ref = $bdd->prepare('SELECT * FROM cours WHERE id_prof = ? OR id_prof2 = ?');
         $req_temps_ref -> execute(array($idpr,$idpr));
-
         /*comparaison de l'heure pour trouver le bon cours de la semaine*/
         while($rep=$req_temps_ref->fetch()){
-
             $array_deb=array($rep['debut']);
             $array_fin=array($rep['fin']);
             $chaine_deb_ref=implode(" ", $array_deb);
@@ -56,7 +57,7 @@
         if(isset($idc)){
             $reqcours = $bdd->prepare('SELECT * FROM `cours` WHERE `id_cours`=?');
             $reqcours->execute(array($idc));
-            while($repcours=$reqcours->fetch()){ $cours=1; $lecours=$repcours['Matière'];}
+            while($repcours=$reqcours->fetch()){ $cours=1; $lecours=$repcours['Matière']; $salle=$repcours['salle'];}
         }
         else{ $pascours=1;}
         
@@ -72,86 +73,87 @@
         <title>Administration</title>
     </head>
     <body>
-    	<header> IUT de Saint-Malo </header>
+        <header> IUT de Saint-Malo </header>
         <h1>Administration</h1>
         <!-- lien vers l'edt -->
         <h4><a href="emploidutemps.php">Mettre à jour l'emploi du temps</a></h4>
         <!-- afficher le cours actuel d'un enseignant -->
+        <h4>Chercher un enseignant</h4>
         <form method="post" action="administration.php">
-        	<select name="enseignant">
-        		<?php 
-        			$req = $bdd->query('SELECT * FROM `personnel`');
-        			while($rep=$req->fetch()){
+            <select name="enseignant">
+                <?php 
+                    $req = $bdd->query('SELECT * FROM `personnel`');
+                    while($rep=$req->fetch()){
                         $nom=$rep['Nom'].' '.$rep['Prénom'];
-        				echo '<option value='.$nom.'/>'.$nom.'</option>';
-        			}
-        		?>
-        	</select>
+                        echo '<option value='.$nom.'/>'.$nom.'</option>';
+                    }
+                ?>
+            </select>
             <?php 
                 if ((isset($pascours)) && ($pascours==1)){ echo $k[0]." n'est pas en cours.";}
-                else if((isset($cours)) && ($cours==1)){echo $k[0].' a cours de '.$lecours;}
+                else if((isset($cours)) && ($cours==1)){echo $k[0].' a cours de '.$lecours,' en ',$salle;}
              ?>
-        	<input type="submit" name="submit" value="Rechercher"/>
+            <input type="submit" name="submit" value="Rechercher"/>
         </form>
         <!-- upload du fichier étudiants pour remplir la bdd -->
-    	<h4>Liste des étudiants au format CSV :</h4>
-    	<form method="post" action="excel.php" enctype="multipart/form-data">
-    		<input type="file" name="file" id="file" /><br>
-    		<input type="submit" name="submit" value="Envoyer"/>
-    	</form>
-    	<br><br>
-    	<!-- ajout d'un enseignant dans la bdd -->
-    	<h4>Ajouter un intervenant :</h4>
-    	<fieldset>
-    	<form method="post" action="administration.php">
-    		Nom : <input type="text" name="nom" /> <br>
-    		Prénom : <input type="text" name="prénom" /> <br>
-    		Login : <input type="text" name="log" /> <br>
-    		Mot de passe : <input type="password" name="mdp" /> <br>
-    		<input type="submit" name="submit" value="Envoyer"/>
-    	</form>
-    	</fieldset>
-		<!-- récupération des justificatifs étudiants -->
-	<?php 
-		$abs=$bdd->query('SELECT DISTINCT filename FROM justificatif,etudiant WHERE etudiant.login=justificatif.loginetu');
-		echo "<h2>Récupérer les justificatifs des élèves</h2><br/>";
-		//Ouvre le répertoire et le créé s'il n'existe pas
-		if(!is_dir('justificatifs')){
-			mkdir('justificatifs');
-		}
-		$rep= opendir("justificatifs");
-		echo "<center><table id='justif'>\n";		//tableau affichant les justificatifs d'élèves 
-		while($fichierex = readdir($rep)){			//fichiers existants dans le répertoire
-			if ($fichierex!="." && $fichierex!=".."){	
-				while ($justif=$abs->fetch()){
-					$fichier=$justif['filename'];
-					echo "<tr>";
-					echo "<td><form method='post' action='suppression.php'><button type='submit' name='bouton' value='",$justif['filename'],"'>test</button></form></td>"; //amène à suppression.php
-					echo "<td id='test' ><a href='justificatifs/", $fichier ,"' target='_blank'>Télécharger le justificatif $fichier</a></td>";
-					$abs2=$bdd->prepare('SELECT * FROM justificatif,etudiant WHERE filename=? AND etudiant.login=justificatif.loginetu');
-					$abs2->execute(array($fichier));
-					while ($justif2=$abs2->fetch()){
-						$nom=$justif2['Nom'];
-						$prenom=$justif2['Prénom'];
-						$date=$justif2['dateabs'];
-						$demij=substr($date,11,18);
-						$date=substr($date,0,10);
-						if ($demij=="matin")
-							echo "<td><p>Absence de $prenom $nom le $date le $demij</p></td>";
-						if ($demij=="après-midi")
-							echo "<td><p>Absence de $prenom $nom le $date l'$demij</p></td>";
-					}	
-					echo "</tr>";
-				}
-			}
-		}
-		echo "</table></center>\n";
-		closedir($rep);
+        <h4>Liste des étudiants au format CSV :</h4>
+        <form method="post" action="excel.php" enctype="multipart/form-data">
+            <input type="file" name="file" id="file" /><br>
+            <input type="submit" name="submit" value="Envoyer"/>
+        </form>
+        <br><br>
+        <!-- ajout d'un enseignant dans la bdd -->
+        <h4>Ajouter un intervenant :</h4>
+        <fieldset>
+        <form method="post" action="administration.php">
+            Nom : <input type="text" name="nom" /> <br>
+            Prénom : <input type="text" name="prénom" /> <br>
+            Login : <input type="text" name="log" /> <br>
+            Mot de passe : <input type="password" name="mdp" /> <br>
+            <input type="submit" name="submit" value="Envoyer"/>
+        </form>
+        </fieldset>
+        <!-- récupération des justificatifs étudiants -->
+    <?php 
+        $abs=$bdd->query('SELECT DISTINCT filename FROM justificatif,etudiant WHERE etudiant.login=justificatif.loginetu');
+        echo "<h2>Récupérer les justificatifs des élèves</h2><br/>";
+        //Ouvre le répertoire et le créé s'il n'existe pas
+        if(!is_dir('justificatifs')){
+            mkdir('justificatifs');
+        }
+        $rep= opendir("justificatifs");
+        echo "<center><table id='justif'>\n";       //tableau affichant les justificatifs d'élèves 
+        while($fichierex = readdir($rep)){          //fichiers existants dans le répertoire
+            if ($fichierex!="." && $fichierex!=".."){   
+                while ($justif=$abs->fetch()){
+                    $fichier=$justif['filename'];
+                    echo "<tr>";
+                    echo "<td><form method='post' action='suppression.php'><button type='submit' name='bouton' value='",$justif['filename'],"'>test</button></form></td>"; //amène à suppression.php
+                    echo "<td id='test' ><a href='justificatifs/", $fichier ,"' target='_blank'>Télécharger le justificatif $fichier</a></td>";
+                    $abs2=$bdd->prepare('SELECT * FROM justificatif,etudiant WHERE filename=? AND etudiant.login=justificatif.loginetu');
+                    $abs2->execute(array($fichier));
+                    while ($justif2=$abs2->fetch()){
+                        $nom=$justif2['Nom'];
+                        $prenom=$justif2['Prénom'];
+                        $date=$justif2['dateabs'];
+                        $demij=substr($date,11,18);
+                        $date=substr($date,0,10);
+                        if ($demij=="matin")
+                            echo "<td><p>Absence de $prenom $nom le $date le $demij</p></td>";
+                        if ($demij=="après-midi")
+                            echo "<td><p>Absence de $prenom $nom le $date l'$demij</p></td>";
+                    }   
+                    echo "</tr>";
+                }
+            }
+        }
+        echo "</table></center>\n";
+        closedir($rep);
         ?>
-		<br/><br/><br/><br/><br/>
+        <br/><br/><br/><br/><br/>
 
-		<!-- FIN, déconnexion -->
-    	<script>
+        <!-- FIN, déconnexion -->
+        <script>
                 function Deconnexion ()
                 {
                 function RedirigeDeconnexion()
@@ -164,11 +166,11 @@
                     }
                 }
         </script>
-    	<button class="btn-warning btn-outline" href="deconnect.php" onclick="Deconnexion()">Déconnexion</button>
+        <button class="btn-warning btn-outline" href="deconnect.php" onclick="Deconnexion()">Déconnexion</button>
 
         <a class="btn-warning btn-outline" href="faq.php" role="button">FAQ</a>
 
         <a class="btn-warning btn-outline" href="modifs.php" role="button">Paramètres du compte</a>
     </body>
-<?php ob_end_flush(); ?>	
+<?php ob_end_flush(); ?>    
 </html>
