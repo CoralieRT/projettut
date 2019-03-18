@@ -10,7 +10,7 @@
         $reqetu = $bdd->prepare('UPDATE bdd_promo.etudiant SET `MDP`= ? WHERE login = ? AND MDP = ?');
         $reqens = $bdd->prepare('UPDATE bdd_promo.personnel SET `MDP`= ? WHERE login = ? AND MDP = ?');
 
-        if(crypt($_POST['mdp1'],$login)==$mdp)
+        if(crypt($_POST['mdp1'],$login)==$_SESSION['mdp'])
         {
             $verif_login = $bdd->prepare('SELECT COUNT(*) FROM bdd_promo.personnel WHERE login = ?'); //On vérifie que le login existe dans la table
             $verif_login->execute(array($login));
@@ -25,7 +25,7 @@
             // Si le login existe dans la table étudiant
             if($verif_login->fetchColumn() !=0) 
             {    
-                $reqetu->execute(array($nvmdp,$login,$mdp));
+                $reqetu->execute(array($nvmdp,$login,$_SESSION['mdp']));
             }
             ?>
 
@@ -90,7 +90,7 @@
             ?>
             <form method='POST' action='modifs.php'>
             <br><legend>Ajout/changement de votre adresse mail :</legend>
-                <input type='hidden' name='etu' value=$login>
+                <input type='hidden' name='etu' value=<?php echo $_SESSION['login']; ?>>
                 <input type='email' name='email' size='30'><br>
                 <input type='submit' class='btn btn-success' value='envoyer' />
             </form><?php
@@ -104,7 +104,7 @@
             echo "Vous avez défini l'adresse mail $email pour recevoir vos notifications d'absence.";?>
             <form method='POST' action='modifs.php'>
             <br><legend>Ajout/changement de votre adresse mail :</legend>
-                <input type='hidden' name='prof' value=$login>
+                <input type='hidden' name='prof' value=<?php echo $_SESSION['login']; ?>>
                 <input type='email' name='email' size='30'><br>
                 <input type='submit' class='btn btn-success' value='envoyer' />
             </form><?php
